@@ -1,0 +1,44 @@
+Host a static site on S3 (Console)
+
+Prereq: Have index.html ready.
+
+Bucket & website setup
+•	 Go to S3 Console → Create bucket
+•	 Bucket name: static-website-hosting-shree (use one name everywhere; if you prefer static_website_hosting, replace it consistently in policy & URL)
+•	 AWS Region: us-east-1 (N. Virginia)
+•	 Object Ownership: keep default (Bucket owner enforced)
+•	 Block Public Access: uncheck “Block all public access” → confirm the warning
+•	 Click Create bucket
+
+Enable website hosting
+•	 Open the bucket → Properties → Static website hosting
+•	 Click Edit → Enable
+•	 Index document: index.html
+•	 Save. Copy the Website endpoint (will look like
+http://static-website-hosting-shree.s3-website-us-east-1.amazonaws.com)
+Upload content
+•	 Go to Objects → Upload → add index.html → Upload
+
+Public permission (Bucket policy)
+•	 Go to Permissions → Bucket policy → Edit → paste this JSON → Save
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::static-website-hosting-shree/*"
+    }
+  ]
+}
+
+Test
+•	 Open the Website endpoint in a new browser tab
+http://static-website-hosting-shree.s3-website-us-east-1.amazonaws.com
+
+Quick fixes:
+• 403 (AccessDenied): Check “Block public access” is disabled and bucket policy saved.
+• 404 (Not Found): Confirm object key is exactly index.html.
+• No Styles/Images: Ensure you uploaded them and policy covers /*.
