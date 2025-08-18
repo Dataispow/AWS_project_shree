@@ -1,0 +1,85 @@
+* Create IAM role
+* Create Lambda function
+* Add Python code
+* Deploy & test
+
+
+
+🚀 Create S3 Bucket Using AWS Lambda (Python)
+
+This project demonstrates how to create an S3 bucket using a Lambda function written in Python.
+
+📌 Prerequisites
+
+AWS Account
+
+IAM role with required policies
+
+Python 3.9 runtime support in Lambda
+
+1️⃣ Create IAM Role for Lambda
+Go to IAM → Roles → Create Role
+Select AWS Service → Lambda
+Attach the following policies:
+AmazonS3FullAccess → Allows creating S3 bucket
+AWSLambdaBasicExecutionRole → Required for CloudWatch logs
+Save role with name → LambdaS3Role
+
+2️⃣ Create Lambda Function
+Go to AWS Lambda → Create function
+Select Author from scratch
+Function name: lamdas3cr
+Runtime: Python 3.9
+Execution role: Choose LambdaS3Role (created earlier)
+Click Create function
+
+3️⃣ Add Python Code
+Replace default Lambda code with the following:
+
+import boto3
+
+def lambda_handler(event, context):
+    s3 = boto3.client('s3')
+
+    # Must be globally unique bucket name
+    bucket_name = "my-lambda-created-bucket-12345-shree"
+    region = "ap-south-1"  # Mumbai region
+
+    try:
+        response = s3.create_bucket(
+            Bucket=bucket_name,
+            CreateBucketConfiguration={'LocationConstraint': region}
+        )
+        return {
+            'statusCode': 200,
+            'body': f"S3 Bucket '{bucket_name}' created successfully!"
+        }
+
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': str(e)
+        }
+
+4️⃣ Deploy & Test
+
+Click Deploy in Lambda console.
+Change function timeout (optional):
+Go to Configuration → General configuration → Edit
+Set Timeout to 1 min
+Go to Test → Configure test event:
+
+{
+  "test": "s3bucket"
+}
+Click Test → You should see success message.
+
+Check S3 Console for the new bucket.
+
+
+⚠️ Possible Errors
+
+BucketAlreadyOwnedByYou → You already have a bucket with the same name.
+BucketAlreadyExists → Someone else has already taken that bucket name (must be globally unique).
+AccessDenied → IAM role does not have s3:CreateBucket permission.
+InvalidLocationConstraint → Wrong region name. Use ap-south-1, us-east-1, etc.
