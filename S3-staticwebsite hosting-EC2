@@ -1,0 +1,165 @@
+🚀 Project: Static Website Hosting on AWS EC2 with S3 Integration
+
+
+
+This project demonstrates hosting a static website by using Amazon EC2 and Amazon S3. The workflow involves creating an S3 bucket for storing website files and deploying them onto an EC2 instance running Apache.
+
+📌 Step-by-Step Implementation
+
+Step 1: 
+
+*Create an IAM Role
+
+*Go to IAM Console → Roles → Create Role.
+
+*Select EC2 as the trusted entity.
+
+*Attach the AmazonS3FullAccess policy.
+
+*Name the role (e.g., EC2-S3-Access-Role) and create it.
+
+*This role allows EC2 to access S3 securely without storing keys.
+
+
+
+Step 2: 
+
+*Create an S3 Bucket
+
+*Open the S3 Console → Create Bucket.
+
+*Give a globally unique bucket name (e.g., my-static-website-bucket-shree).
+
+*Choose region (e.g., ap-south-1).
+
+*Keep default ownership settings.
+
+*Upload your static website files (HTML, CSS, JS, images).
+
+*Verify with:
+
+                      aws s3 ls
+
+
+
+Step 3: 
+
+*Launch an EC2 Instance
+
+*Go to EC2 Console → Launch Instance.
+
+*Choose Amazon Linux 2 AMI.
+
+*Select instance type (e.g., t2.micro).
+
+*In User Data, add the script:
+
+
+
+                        #!/bin/bash
+
+                        yum update -y                
+
+                        yum install -y httpd        
+
+                        systemctl start httpd        
+
+                        systemctl enable httpd  
+
+Launch with key pair and security group allowing HTTP (port 80).
+
+
+
+Step 4: 
+
+*Attach IAM Role to EC2
+
+*After instance launch → Select EC2 → Actions → Security → Modify IAM Role.
+
+*Attach the IAM role created in Step 1.
+
+*Verify inside EC2:
+
+                           aws s3 ls
+
+
+
+Step 5: 
+
+*Copy Website Files from S3 to EC2
+
+*Connect to EC2 via terminal.
+
+*Copy files from S3 to Apache root directory:
+
+
+
+aws s3 cp s3://my-static-website-bucket-shree/ /var/www/html/ --recursive
+
+
+
+Step 6: 
+
+*Verify Website Hosting
+
+Open EC2 Public IP in browser:
+
+
+
+http://<EC2-Public-IP>
+
+The static website stored in S3 is now hosted via Apache on EC2.
+
+
+
+🐞 Issues Faced (Bugs During Setup)
+
+Apache Default Page Issue
+
+After copying files, Apache still showed the default page.
+
+✅ Fix: Remove index.html from /var/www/html (default Apache file) before copying.
+
+403 Forbidden Error
+
+Occurred when S3 bucket files were not public/readable.
+
+
+
+✅ Fix: Ensure proper file permissions or copy with correct owner (chown apache:apache /var/www/html -R).
+
+IAM Role Not Attached
+
+Running aws s3 ls gave AccessDenied error.
+
+
+
+✅ Fix: Attach IAM role to EC2 manually if missed during instance launch.
+
+Security Group Block
+
+Website not opening in browser.
+
+
+
+✅ Fix: Allowed Inbound Rule → HTTP (80) in Security Group.
+
+User Data Script Not Executed
+
+Apache not installed automatically.
+
+
+
+✅ Fix: Re-launch instance with User Data (check in /var/log/cloud-init-output.log).
+
+
+
+✅ Key Learnings & Highlights
+
+Learned IAM Role-based secure access between EC2 & S3.
+
+Automated Apache installation with User Data.
+
+Debugged real-world issues like 403 errors, IAM role permissions, SG blocks.
+
+Successfully hosted a static website on AWS Cloud end-to-end.
